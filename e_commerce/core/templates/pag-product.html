@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block main %}
+<link rel="stylesheet" href="{% static 'css/pag-product.css' %}">
+{% comment %} <link rel="stylesheet" href="{% static 'js/contador.js' %}"> {% endcomment %}
+
+<section class="card-img">
+    <div class="img-container">
+        <div id="img-center">
+            <img id="img-color" src="{% static 'img/image_1.png' %}" alt="">
+        </div>
+        <p>All hand-made with natural soy wax,<br> Candleaf is made for your pleasure moments.</p>
+        <p id='free-shiping'>🚚 FREE SHIPPING</p>
+    </div>
+
+    <article class="card-info-produto">
+        <form action="">
+            <p id="name-product">Spiced Mint Candleaf®</p>
+            <p id="price-product">$ 9.99</p>
+            <div class="center-contador">
+                <div id="contador">
+                    <p>Quantity</p>
+                    <button type="button" id="decrementar">-</button>
+                    <span id="quantidade">0</span>
+                    <button type="button" id="incrementar">+</button>
+                </div>
+                <button id="button-submit"><img src="{% static 'img/Cart-White.svg' %}" alt="">Add to cart</button>
+            </div>
+        </form>
+        <div class="card-descicao">
+            <p></strong>Wax:</strong> Top grade Soy wax that delivers a smoke less,  consistent burn</p>
+            <p></strong>Fragrance:</strong> Premium quality ingredients with natural essential oils </p>
+            <li><strong>Burning Time:</strong> 70-75 hours</li>
+            <li></strong>Dimension:</strong> 10cm x 5cm </li>
+            <li></strong>Weight:</strong> 400g </li>
+        </div>
+
+    </article>
+
+</section>
+
+
+
+
+
+
+
+<script>
+    // Variáveis e funções JavaScript para manipular o contador
+    var quantidadeElemento = document.getElementById('quantidade');
+    var quantidade = 0;
+
+    function incrementar() {
+        quantidade++;
+        atualizarQuantidade();
+    }
+
+    function decrementar() {
+        if (quantidade > 0) {
+            quantidade--;
+            atualizarQuantidade();
+        }
+    }
+
+    function atualizarQuantidade() {
+        quantidadeElemento.textContent = quantidade;
+    }
+
+    // Adicionando ouvintes de evento aos botões
+    document.getElementById('incrementar').addEventListener('click', incrementar);
+    document.getElementById('decrementar').addEventListener('click', decrementar);
+</script>
+{% endblock main %}

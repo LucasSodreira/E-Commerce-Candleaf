@@ -1,0 +1,117 @@
+.card-container {
+    position: relative;
+    width: 100%;
+}
+
+.card-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.card-bg{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.8); /* Adapte a cor de fundo conforme necessário */
+    padding: 6rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.card-bg h1{
+    font-size: 2rem;
+    font-family: 'poppins';
+    font-weight: 500;
+    color: #000;
+}
+
+.card-bg h2{
+    font-size: 1rem;
+    font-family: 'poppins';
+    font-weight: 500;
+    color: #000;
+}
+
+.card-bg a{
+    font-size: 1.3rem;
+    font-family: 'poppins';
+    font-weight: 500;
+    color: white;
+    text-decoration: none;
+    border: 1px solid;
+    background-color: #56B280;
+    padding: 1rem;
+    border-radius: 5px;
+}
+
+.container-products{
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    margin-top: 2rem;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.container-products h1{
+    font-size: 1.5rem;
+    font-family: 'poppins';
+    font-weight: 600;
+    color: #0B254B;
+}
+
+.container-products h2{
+    font-size: 1rem;
+    font-family: 'poppins';
+    font-weight: 500;
+    color: #5E6E89;
+}
+
+.cards-products{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2rem;
+    width: 85%;
+}
+
+.product-card{
+    flex-basis: calc(33.33% - 20px); /* Defina a largura desejada para cada item */
+    flex-grow: 1; /* Permitir que os itens cresçam para ocupar todo o espaço disponível */
+    margin: 10px;
+    box-sizing: border-box;
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1);
+    background: #F7F8FA;
+    border-radius: 1rem;
+}
+
+.product-card p{
+    font-size: 1.2rem;
+    font-family: 'poppins';
+    font-weight: 500;
+    color: #1D293F;
+    text-align: left;
+}
+
+.product-card #price{
+    color: #56B280;
+    font-size: 1.3rem;
+    font-family: 'poppins';
+    font-weight: 500;
+}
+
+.product-card a{
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.info-card{
+    padding: 1rem;
+    background: white;
+}

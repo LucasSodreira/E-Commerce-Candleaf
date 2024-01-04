@@ -1,0 +1,76 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <title>Candleaf</title>
+</head>
+<body>
+    
+<header class="header_base">
+    {% block header %}
+    <a href="{% url 'index' %}" id="logo"><img id="logo_img" src="{% static 'img/logo.svg'%}" alt="Candleaf"></a>
+    {% if user.is_authenticated %}
+        {% if user.is_superuser %}
+            <nav class="nav_base">
+                <li><a href="#">Discovery</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="{% url 'panel' %}">Panel</a></li>
+            </nav>
+        {% else %}
+
+        {% endif %}
+            {% else %}
+            <nav class="nav_base">
+                <li><a href="#">Discovery</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Contact us</a></li>
+            </nav>
+        {% endif %}
+    
+    {% if user.is_authenticated %}
+        {% if user.is_superuser %}
+            <li class="login"><a href="#" class="login"><img src="{% static 'img/Vector.svg' %}" alt=""></a></li>
+            {% else %}
+                <li class="login"><a href="#"><img src="{% static 'img/Vector.svg' %}" alt=""></a></li>
+        {% endif %}
+            {% else %}
+            <li class="login"><a href="{% url 'admin:index' %}">Login</a></li>
+    {% endif %}
+        
+    <a href="#" id="cart"><img src="{% static 'img/Cart.svg' %}" alt="Carrinho"></a>
+    {% endblock header %}
+</header>
+<main>
+    {% block main %}
+      
+    {% endblock %}
+</main>
+
+<footer class="footer-container">
+    {% block flooter %}
+    <div class="hr-div">
+        <hr>
+    </div>
+    <div class="container-footer">
+        <div class="footer-logo">
+            <img src="{% static 'img/footer.svg' %}" alt="">
+            <p>Your natural candle made for your home and for your wellness.</p>
+        </div>
+        <nav class="nav-footer">
+            <li><a href="#">Discovery</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact us</a></li>
+        </nav>
+    </div>
+    {% endblock flooter %}
+</footer>
+
+</body>
+</html>

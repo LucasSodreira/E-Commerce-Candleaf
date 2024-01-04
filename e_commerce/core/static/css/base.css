@@ -1,0 +1,93 @@
+* {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+  font-family: "Poppins", sans-serif;
+}
+
+.header_base {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #fff;
+  display: flex;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.header_base .nav_base {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+li a {
+  display: block;
+  color: black;
+  font-size: 1.1rem;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+#cart {
+  margin-left: auto;
+  display: flex;
+}
+
+#logo {
+  display: flex;
+}
+
+hr {
+  width: 90%;
+  padding: 3px;
+  background: white;
+  border-radius: 6px;
+}
+
+.footer-container {
+  background-color: #272727;
+  padding: 1rem;
+}
+
+.nav-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.nav-footer a {
+  color: white;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.nav-footer li{
+  list-style-type: none;
+}
+
+.footer-logo{
+  color: white;
+}
+
+.container-footer{
+  display: flex;
+  justify-content: space-around;
+}
+
+.hr-div{
+  display: flex;
+  justify-content: center;
+}
+
+.login img{
+  display: flex;
+}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block main %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+<div class="card-container">
+    <div class="bg-image">
+        <img src="{% static 'img/bg-image.png' %}" alt="" />
+    </div>
+    <div class="card-bg">
+        <h1>The nature candle</h1>
+        <h2>All handmade with natural soy wax, Candleaf is a companion for all your pleasure moments</h2>
+        <a href="#">Discovery our collection</a>
+    </div>
+</div>
+
+<div class="container-products">
+    <h1>Products</h1>
+    <h2>Order it for you or for your beloved ones </h2>
+
+    <div class="cards-products">
+        <div class="product-card">
+            <a href="#">
+                <img src="{% static 'img/image_1.png' %}" alt="">
+            </a>
+            <div class="info-card">
+                <p>Name Produto: </p>
+                <p id="price">Price: </p>
+            </div>
+        </div>
+        <div class="product-card">
+            <a href="#">
+                <img src="{% static 'img/image_1.png' %}" alt="">
+            </a>
+            <div class="info-card">
+                <p>Name Produto: </p>
+                <p id="price">Price: </p>
+            </div>
+        </div>
+        <div class="product-card">
+            <a href="#">
+                <img src="{% static 'img/image_1.png' %}" alt="">
+            </a>
+            <div class="info-card">
+                <p>Name Produto: </p>
+                <p id="price">Price: </p>
+            </div>
+        </div>
+        <div class="product-card">
+            <a href="#">
+                <img src="{% static 'img/image_1.png' %}" alt="">
+            </a>
+            <div class="info-card">
+                <p>Name Produto: </p>
+                <p id="price">Price: </p>
+            </div>
+        </div>
+        <div class="product-card">
+            <a href="#">
+                <img src="{% static 'img/image_1.png' %}" alt="">
+            </a>
+            <div class="info-card">
+                <p>Name Produto: </p>
+                <p id="price">Price: </p>
+            </div>
+        </div>
+        <div class="product-card">
+            <a href="#">
+                <img src="{% static 'img/image_1.png' %}" alt="">
+            </a>
+            <div class="info-card">
+                <p>Name Produto: </p>
+                <p id="price">Price: </p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
