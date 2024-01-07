@@ -4,78 +4,93 @@
 
 {% block main %}
 <link rel="stylesheet" href="{% static 'css/index.css' %}">
-<div class="card-container">
-    <div class="bg-image">
-        <img src="{% static 'img/bg-image.png' %}" alt="" />
-    </div>
-    <div class="card-bg">
-        <h1>The nature candle</h1>
-        <h2>All handmade with natural soy wax, Candleaf is a companion for all your pleasure moments</h2>
-        <a href="#">Discovery our collection</a>
-    </div>
+<script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+  crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#filtro-form').submit(function(e) {
+          e.preventDefault();
+          console.log('Botão clicado!');
+      
+          var nomeProduto = $('#input-filter').val();
+          var filtro = $('#filter').val();
+      
+          // Aqui você deve fazer uma requisição AJAX para a sua view Django
+          // Passando os parâmetros de filtro para a URL desejada
+      
+          $.ajax({
+            url: '{% url "index" %}',
+            method: 'GET',
+            data: {
+              nome_produto: nomeProduto,
+              filtro: filtro
+            },
+            success: function(data) {
+              // Atualize a parte da página que exibe os produtos com os resultados filtrados
+              // Adicionando o novo conteúdo ao final da div existente
+              $('.container-products').html(data);
+              console.log(data)
+              
+            },
+            error: function(error) {
+              console.log('Erro ao enviar a requisição de filtro:', error);
+            }
+          });
+          return false;
+        });
+      });
+</script>
+
+
+<h1 id="title">Products</h1>
+<h2 id="sub-title">Order it for you or for your beloved ones </h2>
+
+<div class="div-filter">
+    <form id="filtro-form">
+        <input type="text" id="input-filter" name="nome_produto">
+        <select name="filter" id="filter">
+            <option value="" selected disabled>Selecione</option>
+            {% for categoria in categorias %}
+                <option value="{{ categoria.id }}">{{ categoria.nome }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" id="enviar">Enviar</button>
+    </form>
+
+    {% if user.is_superuser %}
+        <a href="{% url 'cadastro_produto' %}" id="new-product">Novo Produto</a>
+    {% endif %}
 </div>
 
-<div class="container-products">
-    <h1>Products</h1>
-    <h2>Order it for you or for your beloved ones </h2>
+<div class="center-cards">
 
-    <div class="cards-products">
-        <div class="product-card">
-            <a href="#">
-                <img src="{% static 'img/image_1.png' %}" alt="">
-            </a>
-            <div class="info-card">
-                <p>Name Produto: </p>
-                <p id="price">Price: </p>
+    <div class="container-products">
+        
+        {% for produto in produtos %}
+            <div class="product-card">
+                <a href="{% url 'pag_product' id=produto.id %}" id="edit-img">
+                    <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}" onerror="this.src='{% static 'img/image._1.png' %}'">
+                </a>
+                <div class="info-card">
+                    <p>{{ produto.nome }}</p>
+                    <p id="price">{{ produto.preco }}</p>
+                    <div class="center-img">
+                        <a href="{% url 'produto_remover' id=produto.id %}" id="excluir">
+                            <img src="{% static 'img/trash.png' %}" alt="">
+                        </a>
+                        <a href="{% url 'produto_editar' id=produto.id %}" id="editar">
+                            <img src="{% static 'img/pencil.png' %}" alt="">
+                        </a>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="product-card">
-            <a href="#">
-                <img src="{% static 'img/image_1.png' %}" alt="">
-            </a>
-            <div class="info-card">
-                <p>Name Produto: </p>
-                <p id="price">Price: </p>
-            </div>
-        </div>
-        <div class="product-card">
-            <a href="#">
-                <img src="{% static 'img/image_1.png' %}" alt="">
-            </a>
-            <div class="info-card">
-                <p>Name Produto: </p>
-                <p id="price">Price: </p>
-            </div>
-        </div>
-        <div class="product-card">
-            <a href="#">
-                <img src="{% static 'img/image_1.png' %}" alt="">
-            </a>
-            <div class="info-card">
-                <p>Name Produto: </p>
-                <p id="price">Price: </p>
-            </div>
-        </div>
-        <div class="product-card">
-            <a href="#">
-                <img src="{% static 'img/image_1.png' %}" alt="">
-            </a>
-            <div class="info-card">
-                <p>Name Produto: </p>
-                <p id="price">Price: </p>
-            </div>
-        </div>
-        <div class="product-card">
-            <a href="#">
-                <img src="{% static 'img/image_1.png' %}" alt="">
-            </a>
-            <div class="info-card">
-                <p>Name Produto: </p>
-                <p id="price">Price: </p>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 
 </div>
-
-{% endblock %}
+    
+    {% endblock %}
+    

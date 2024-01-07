@@ -16,11 +16,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from core.views import index, pag_product, panel
+from django.conf.urls.static import static
+from core.views import *
+from django.conf import settings
+from django.urls import include
 
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin:index'),
-    path('', index, name='index'),
-    path('pag-product/', pag_product, name='pag_product'),
-    path('panel/', panel, name='panel'),
-]
+    
+    # path('produto/', include('e_commerce.urls')),
+    path('cadastro_produto/', produto_criar, name='cadastro_produto'),
+    path('', listar_produtos, name='index'),
+    
+    path('produto/<int:id>/', pag_product, name='pag_product'),
+    path('produto/editar/<int:id>/', produto_editar, name='produto_editar'),
+    path('produto/remover/<int:id>/',produto_remover, name='produto_remover'),
+    
+]+ static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

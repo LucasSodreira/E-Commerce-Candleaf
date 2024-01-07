@@ -1,0 +1,82 @@
+main{
+    display: flex;
+    justify-content: center;
+}
+
+.container-cadastro h1{
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2F44FF;
+}
+
+.container-cadastro p{
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #2F44FF;
+}
+
+.container-cadastro{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    margin-top: 2rem;
+}
+
+.container-cadastro #titulo{
+    width: 75%;
+    text-align: center;
+    border-radius: 8px;
+    background: #DEDEDE;
+    padding: 6px;
+    word-wrap: break-word;
+}
+
+.container-cadastro #descricao{
+    width: 75%;
+    background: #DEDEDE;
+    border-radius: 8px;
+    resize: vertical;
+}
+
+#imagem{
+    background: #DEDEDE;
+    border-radius: 6px;
+    padding: 0.6rem;
+}
+
+#valor{
+    background: #DEDEDE;
+    border-radius: 6px;
+    padding: 0.6rem;
+    width: 15%;
+    text-align: center;
+}
+
+#enviar{
+    background: #2F44FF;
+    border-radius: 6px;
+    padding: 0.6rem 2rem;
+    font-size: 1.1rem;
+    text-align: center;
+    color: wheat;
+}
+
+.center-submit{
+    display: flex;
+    justify-content: center;
+}
+
+.center-img-valor{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+form{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
