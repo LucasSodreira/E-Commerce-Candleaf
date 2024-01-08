@@ -18,20 +18,17 @@
         <div class="center-img-valor">
             {{form.imagem}}
             
-            <p>Categoria:</p>
-            {{ form.categoria }}
-
-            {{form.preco}}
+            <div class="cernter">
+                <p>Categoria:</p>
+                {{ form.categoria }}
+                
+                {{form.preco}}
+            </div>
         </div>
         <div class="center-submit">
             <input type="submit" value="Enviar" id="enviar">
         </div>
     </form>
-
-    {% if form.instance.imagem %}
-    <img src="{{ form.instance.imagem.url }}" alt="{{ form.instance.nome }}">
-    {% endif %}
-
 </div>
 
 

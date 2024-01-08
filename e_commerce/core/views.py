@@ -45,7 +45,7 @@ def produto_editar(request,id):
     produto = get_object_or_404(Produto, id=id)
    
     if request.method == 'POST':
-        form = ProdutoForm(request.POST,instance = produto)
+        form = ProdutoForm(request.POST, request.FILES, instance = produto)
 
         if form.is_valid():
             form.save()
@@ -53,7 +53,7 @@ def produto_editar(request,id):
     else:
         form = ProdutoForm(instance=produto)
 
-    return render(request,'cadastro_pag.html')
+    return render(request,'cadastro_pag.html', {'form': form})
 
 
 def produto_remover(request, id):
@@ -72,3 +72,9 @@ def produto_criar(request):
         form = ProdutoForm()
 
     return render(request, "cadastro_pag.html", {'form': form})
+
+def login(request):
+    return render(request, 'login.html')
+
+def cadastro(request):
+    return render(request, 'cadastro.html')

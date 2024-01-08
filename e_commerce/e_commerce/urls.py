@@ -32,4 +32,7 @@ urlpatterns = [
     path('produto/editar/<int:id>/', produto_editar, name='produto_editar'),
     path('produto/remover/<int:id>/',produto_remover, name='produto_remover'),
     
+    path('login/', login, name='login'),
+    path('cadastro/', cadastro, name='cadastro'),
+    
 ]+ static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

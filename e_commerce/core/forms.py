@@ -10,6 +10,6 @@ class ProdutoForm(ModelForm):
             'nome': forms.TextInput(attrs={'id': 'titulo', 'placeholder': 'Informe o título do produto'}),
             'descricao': forms.Textarea(attrs={'id': 'descricao', 'cols': '30', 'rows': '6'}),
             'preco': forms.NumberInput(attrs={'id': 'valor', 'step': '0.01', 'placeholder': '0.00'}),
-            'imagem': forms.ClearableFileInput(attrs={'id': 'imagem'}),
+            'imagem': forms.FileInput(attrs={'id': 'imagem'}),
             'categoria': forms.Select(attrs={'id': 'categoria'}),
         }
