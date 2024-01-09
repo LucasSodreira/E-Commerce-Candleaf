@@ -15,16 +15,17 @@
     <div class="div-login">
         <form action="{% url 'cadastro' %}" method="post" class="form-login">
             {% csrf_token %}
-            <label for="">Nome: </label>
-            <input type="text">
-
-            <label for="">Email: </label>
-            <input type="email">
-
-            <label for="">Senha:</label>
-            <input type="password">
-
-            <button type="submit">Entrar</button>
+            
+            <label for="id_username">Nome de usuário:</label>
+            <input type="text" name="username" id="id_username" placeholder="Nome de usuário">
+        
+            <label for="id_password1">Senha:</label>
+            <input type="password" name="password1" id="id_password1" placeholder="Senha">
+        
+            <label for="id_password2">Confirmar Senha:</label>
+            <input type="password" name="password2" id="id_password2" placeholder="Confirmar senha">
+        
+            <button type="submit">Cadastrar</button>
         </form>
     </div>
 

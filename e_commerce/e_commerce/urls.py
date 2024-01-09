@@ -19,12 +19,13 @@ from django.urls import path
 from django.conf.urls.static import static
 from core.views import *
 from django.conf import settings
-from django.urls import include
+
 
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin:index'),
     
     # path('produto/', include('e_commerce.urls')),
+    
     path('cadastro_produto/', produto_criar, name='cadastro_produto'),
     path('', listar_produtos, name='index'),
     
@@ -34,5 +35,6 @@ urlpatterns = [
     
     path('login/', login, name='login'),
     path('cadastro/', cadastro, name='cadastro'),
+    path('desconectar/', desconectar, name='desconectar'),
     
 ]+ static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

@@ -4,24 +4,28 @@
 {% block main %}
 
 <link rel="stylesheet" href="{% static 'css/login.css' %}">
+  
+<h1 id="titulo">Login</h1>
 
 <div class="container-login">
-
+    
     <div class="img-center">
         <img id="img-pass" src="{% static 'img/authentication.png' %}" alt="Alt">
     </div>
     <div class="div-login">
+        
         <form action="{% url 'login' %}" method="post" class="form-login">
             {% csrf_token %}
-            <label for="">Nome: </label>
-            <input type="text">
-            <label for="">Senha:</label>
-            <input type="password">
-
+            <label for="id_nome">Nome: </label>
+            <input type="text" name="username" id="id_nome">
+            
+            <label for="id_senha">Senha:</label>
+            <input type="password" name="password" id="id_senha">
+            
             <button type="submit">Entrar</button>
         </form>
     </div>
-
+    
 </div>
 
 {% endblock main %}

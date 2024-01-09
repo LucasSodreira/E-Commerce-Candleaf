@@ -17,13 +17,11 @@
 
         <div class="center-img-valor">
             {{form.imagem}}
+        
+            <p>Categoria:</p>
+            {{ form.categoria }}
             
-            <div class="cernter">
-                <p>Categoria:</p>
-                {{ form.categoria }}
-                
-                {{form.preco}}
-            </div>
+            {{form.preco}}
         </div>
         <div class="center-submit">
             <input type="submit" value="Enviar" id="enviar">

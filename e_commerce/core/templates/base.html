@@ -16,33 +16,25 @@
 <header class="header_base">
     {% block header %}
     <a href="{% url 'index' %}" id="logo"><img id="logo_img" src="{% static 'img/logo.svg'%}" alt="Candleaf"></a>
-    {% if user.is_authenticated %}
-        {% if user.is_superuser %}
-            <nav class="nav_base">
-                <li><a href="#">Discovery</a></li>
-                <li><a href="#">About</a></li>
-            </nav>
-        {% else %}
 
-        {% endif %}
-            {% else %}
-            <nav class="nav_base">
-                <li><a href="#">Discovery</a></li>
-                <li><a href="#">About</a></li>
-                <li><a href="#">Contact us</a></li>
-            </nav>
-        {% endif %}
-    
-    {% if user.is_authenticated %}
-        {% if user.is_superuser %}
-            <li class="login"><a href="#" class="login"><img src="{% static 'img/Vector.svg' %}" alt=""></a></li>
-            {% else %}
-                <li class="login"><a href="#"><img src="{% static 'img/Vector.svg' %}" alt=""></a></li>
-        {% endif %}
-            {% else %}
-            <li class="login"><a href="{% url 'admin:index' %}">Login</a></li>
-    {% endif %}
+    <nav class="nav_base">
+        <li><a href="#">Discovery</a></li>
+        <li><a href="#">About</a></li>
+    </nav>
         
+    {% if user.is_superuser %}
+        <p>Tipo da conta: ADMIMISTRADOR</p>
+        <li class="login"><a href="{% url 'desconectar' %}" class="login"><img src="{% static 'img/Vector.svg' %}" alt=""></a></li>
+        {% else %}
+            {% if user.is_authenticated %}
+                <p>Tipo da conta: CLIENTE</p>
+                <li class="login"><a href="{% url 'desconectar' %}" class="login"><img src="{% static 'img/Vector.svg' %}" alt=""></a></li>
+            {% else %}
+                <li class="login"><a href="{% url 'login' %}">Login</a></li>
+                <li class="login"><a href="{% url 'cadastro' %}">Cadastrar</a></li>
+            {% endif %}
+    {% endif %}
+
     <a href="#" id="cart"><img src="{% static 'img/Cart.svg' %}" alt="Carrinho"></a>
     {% endblock header %}
 </header>
