@@ -38,8 +38,10 @@ def pag_product(request, id):
     return render(request, 'pag-product.html', {'produto': produto})
 
 
+# Se o método HTTP for POST e o formulário for válido, o produto é atualizado. 
+# Se for GET, o formulário é preenchido com os detalhes do produto existente.
 @group_required(['ADMINISTRADOR'])
-def produto_editar(request,id):
+def produto_editar(request, id):
     produto = get_object_or_404(Produto, id=id)
    
     if request.method == 'POST':
@@ -53,11 +55,13 @@ def produto_editar(request,id):
 
     return render(request,'cadastro_pag.html', {'form': form})
 
+# Se um produto com o ID fornecido existir, ele é excluído e a página é redirecionada para 'index'.
 @group_required(['ADMINISTRADOR'])
 def produto_remover(request, id):
     produto = get_object_or_404(Produto, id=id)
     produto.delete()
     return redirect('index')
+
 
 @group_required(['ADMINISTRADOR'])
 def produto_criar(request):
@@ -87,9 +91,10 @@ def login(request):
 
         user = authenticate(request, username=username, password=password)
 
-        if user is not None:
+        if user is not None: # Se o usuário existir, faz o login
             auth_login(request, user)
             return redirect('index')
+        
         else:
             return HttpResponse('Credenciais inválidas. Tente novamente.')
 

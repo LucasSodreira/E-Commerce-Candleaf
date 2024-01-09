@@ -14,9 +14,3 @@ class ProdutoForm(ModelForm):
             'imagem': forms.FileInput(attrs={'id': 'imagem'}),
             'categoria': forms.Select(attrs={'id': 'categoria'}),
         }
-
-class CustomUserCreationForm(UserCreationForm):
-    
-    class Meta:
-        model = User
-        fields = UserCreationForm.Meta.fields
