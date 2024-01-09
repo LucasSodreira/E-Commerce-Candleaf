@@ -68,7 +68,6 @@
 <div class="center-cards">
 
     <div class="container-products">
-        
         {% for produto in produtos %}
             <div class="product-card">
                 <a href="{% url 'pag_product' id=produto.id %}" id="edit-img">
@@ -77,6 +76,7 @@
                 <div class="info-card">
                     <p>{{ produto.nome }}</p>
                     <p id="price">{{ produto.preco }}</p>
+                    {% if user.is_superuser %}
                     <div class="center-img">
                         <a href="{% url 'produto_remover' id=produto.id %}" id="excluir">
                             <img src="{% static 'img/trash.png' %}" alt="">
@@ -85,6 +85,7 @@
                             <img src="{% static 'img/pencil.png' %}" alt="">
                         </a>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         {% endfor %}

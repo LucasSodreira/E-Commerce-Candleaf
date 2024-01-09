@@ -1,4 +1,5 @@
 from django.forms import ModelForm
+from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from .models import *
 
@@ -13,3 +14,9 @@ class ProdutoForm(ModelForm):
             'imagem': forms.FileInput(attrs={'id': 'imagem'}),
             'categoria': forms.Select(attrs={'id': 'categoria'}),
         }
+
+class CustomUserCreationForm(UserCreationForm):
+    
+    class Meta:
+        model = User
+        fields = UserCreationForm.Meta.fields
