@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block main %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+<link rel="stylesheet" href="{% static 'js/jquery.js' %}">
+<script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+  crossorigin="anonymous"></script>
+
+<h1 id="title">Products</h1>
+<h2 id="sub-title">Order it for you or for your beloved ones </h2>
+
+<div class="div-filter">
+    <form id="filtro-form" method="GET" action="{% url 'index' %}">
+        <input type="text" id="input-filter" name="nome_produto">
+        <select name="filter" id="filter">
+            <option value="" selected disabled>Selecione</option>
+            {% for categoria in categorias %}
+                <option value="{{ categoria.id }}">{{ categoria.nome }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" id="enviar">Enviar</button>
+    </form>
+
+    {% if user.is_superuser %}
+        <a href="{% url 'cadastro_produto' %}" id="new-product">Novo Produto</a>
+        <a href="{% url 'cadastro_categoria' %}" id="new-product">Nova Categoria</a>
+    {% endif %}
+</div>
+
+<div class="center-cards">
+
+    <div class="container-products">
+
+            {% for produto in produtos %}
+            <div class="product-card">
+                <a href="{% url 'pag_product' id=produto.id %}" id="edit-img">
+                    <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}" onerror="this.src='{% static 'img/image_1.png' %}'">
+                </a>
+                <div class="info-card">
+                    <p>{{ produto.nome }}</p>
+                    <p id="price">{{ produto.preco }}</p>
+
+                    {% if user.is_superuser %}
+                        <p>Categoria: <a href="{% url 'categoria_editar' id=produto.categoria.id %}">{{ produto.categoria }}</a> <a href="{% url 'categoria_remover' id=produto.categoria.id %}">Remover</a></p>
+                        <p>Cadastrado por: {{ produto.criado_por.username }}</p>
+                    {% else %}
+                    <p>Categoria: {{ produto.categoria }}</p>
+                    {% endif %}
+
+                    {% if user.is_superuser %}
+                    <div class="center-img">
+                        <a href="{% url 'produto_remover' id=produto.id %}" id="excluir">
+                            <img src="{% static 'img/trash.png' %}" alt="">
+                        </a>
+                        <a href="{% url 'produto_editar' id=produto.id %}" id="editar">
+                            <img src="{% static 'img/pencil.png' %}" alt="">
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        {% endfor %}
+    </div>
+
+</div>
+    
+{% endblock %}
+    

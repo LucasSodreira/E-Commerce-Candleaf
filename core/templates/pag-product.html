@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block main %}
+<link rel="stylesheet" href="{% static 'css/pag-product.css' %}">
+{% comment %} <link rel="stylesheet" href="{% static 'js/contador.js' %}"> {% endcomment %}
+
+<section class="card-img">
+
+    <div class="img-container">
+        <div id="img-center">
+            <img id="img-color" src="{{ produto.imagem.url }}" alt="{{ produto.nome }}">
+        </div>
+        <p>All hand-made with natural soy wax,<br> Candleaf is made for your pleasure moments.</p>
+        <p id='free-shiping'>🚚 FREE SHIPPING</p>
+    </div>
+
+    <article class="card-info-produto">
+            <p id="name-product">{{produto.nome}}</p>
+            <p id="price-product">$ {{produto.preco}}</p>
+            <div class="center-contador">
+                <div id="contador">
+                    <p>Quantity</p>
+                    <button type="button" id="decrementar">-</button>
+                    <span id="quantidade">0</span>
+                    <button type="button" id="incrementar">+</button>
+                </div>
+                <button id="button-submit"><img src="{% static 'img/Cart-White.svg' %}" alt="">Add to cart</button>
+            </div>
+        <div class="card-descicao">
+            <p id="title-descricao">Description</p>
+            <p id="descricao">{{produto.descricao}}</p>
+        </div>
+        
+    </article>
+    
+</section>
+
+
+<script>
+    // Variáveis e funções JavaScript para manipular o contador
+    var quantidadeElemento = document.getElementById('quantidade');
+    var quantidade = 0;
+
+    function incrementar() {
+        quantidade++;
+        atualizarQuantidade();
+    }
+
+    function decrementar() {
+        if (quantidade > 0) {
+            quantidade--;
+            atualizarQuantidade();
+        }
+    }
+
+    function atualizarQuantidade() {
+        quantidadeElemento.textContent = quantidade;
+    }
+
+    // Adicionando ouvintes de evento aos botões
+    document.getElementById('incrementar').addEventListener('click', incrementar);
+    document.getElementById('decrementar').addEventListener('click', decrementar);
+</script>
+{% endblock main %}

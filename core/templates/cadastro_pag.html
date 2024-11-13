@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block main %}
+    <link rel="stylesheet" href="{% static 'css/castrado.css' %}">
+
+<div class="container-cadastro">
+  
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="centerinfo">
+
+            <h1>Cadastrar Produto</h1>
+            {{form.nome}}
+            
+            <p>Descrição do Produto:</p>
+            {{form.descricao}}
+        </div>
+            
+            <div class="center-img-valor">
+                {{form.imagem}}
+                
+                <p>Categoria:</p>
+                {{ form.categoria }}
+                <a href="{% url 'cadastro_categoria' %}">Add</a>
+                
+                {{form.preco}}
+        </div>
+        <div class="center-submit">
+            <input type="submit" value="Enviar" id="enviar">
+        </div>
+    </form>
+</div>
+
+
+
+{% endblock main %}

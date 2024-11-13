@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block main %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+<script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+  crossorigin="anonymous"></script>
+
+<script>
+    // Aguarda até que o documento HTML esteja totalmente carregado
+    $(document).ready(function() {
+        
+        // Captura o evento de envio do formulário com id 'filtro-form'
+        $('#filtro-form').submit(function(e) {
+            
+            // Impede que o formulário seja enviado da maneira tradicional
+            e.preventDefault();
+      
+            // Obtém os valores dos campos de input
+            var nomeProduto = $('#input-filter').val();
+            var filtro = $('#filter').val();
+      
+            // Faz uma requisição AJAX para a view Django chamada 'index'
+            $.ajax({
+                // Define a URL para a qual a requisição será enviada
+                url: '{% url "index" %}',
+                
+                // Define o método HTTP como GET
+                method: 'GET',
+                
+                // Define os dados a serem enviados com a requisição
+                data: {
+                    nome_produto: nomeProduto,
+                    filtro: filtro
+                },
+                
+                success: function(data) {
+                    // Atualiza a parte da página que exibe os produtos com os resultados filtrados
+                    // Adicionando o novo conteúdo ao final da div existente
+                    $('.container-products').html(data);
+                },
+                
+                // Função chamada em caso de erro na requisição
+                error: function(error) {
+                    console.log('Erro ao enviar a requisição de filtro:', error);
+                }
+            });
+            
+            return false;
+        });
+    });
+</script>
+
+<h1 id="title">Products</h1>
+<h2 id="sub-title">Order it for you or for your beloved ones </h2>
+
+<div class="div-filter">
+    <form id="filtro-form">
+        <input type="text" id="input-filter" name="nome_produto">
+        <select name="filter" id="filter">
+            <option value="" selected disabled>Selecione</option>
+            {% for categoria in categorias %}
+                <option value="{{ categoria.id }}">{{ categoria.nome }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" id="enviar">Enviar</button>
+    </form>
+
+    {% if user.is_superuser %}
+        <a href="{% url 'cadastro_produto' %}" id="new-product">Novo Produto</a>
+        <a href="{% url 'cadastro_categoria' %}" id="new-product">Nova Categoria</a>
+    {% endif %}
+</div>
+
+<div class="center-cards">
+
+    <div class="container-products">
+            <div class="product-card">
+                <a href="{% url 'pag_product' id=produto.id %}" id="edit-img">
+                    <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}" onerror="this.src='{% static 'img/image_1.png' %}'">
+                </a>
+                <div class="info-card">
+                    <p>{{ produto.nome }}</p>
+                    <p id="price">{{ produto.preco }}</p>
+
+                    {% if user.is_superuser %}
+                        <p>Categoria: <a href="{% url 'pag_categoria' id=produto.id %}">{{ produto.categoria }}</a></p>
+                    {% else %}
+                        <p>Categoria: {{ produto.categoria }}</p>
+                    {% endif %}
+
+                    {% if user.is_superuser %}
+                    <div class="center-img">
+                        <a href="{% url 'produto_remover' id=produto.id %}" id="excluir">
+                            <img src="{% static 'img/trash.png' %}" alt="">
+                        </a>
+                        <a href="{% url 'produto_editar' id=produto.id %}" id="editar">
+                            <img src="{% static 'img/pencil.png' %}" alt="">
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+    </div>
+
+</div>
+    
+{% endblock %}
+    

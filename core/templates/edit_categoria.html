@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block main %}
+    
+<link rel="stylesheet" href="{% static 'css/castrado.css' %}">
+<link rel="stylesheet" href="{% static 'css/categoria.css' %}">
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+
+<div class="center-cards">
+
+    <div class="container-products">
+
+            {% for produto in produtos %}
+            <div class="product-card">
+                <a href="{% url 'pag_product' id=produto.id %}" id="edit-img">
+                    <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}" onerror="this.src='{% static 'img/image_1.png' %}'">
+                </a>
+                <div class="info-card">
+                    <p>{{ produto.nome }}</p>
+                    <p id="price">{{ produto.preco }}</p>
+
+                    {% if user.is_superuser %}
+                        <p>Categoria: <a href="{% url 'categoria_editar' id=produto.categoria.id %}">{{ produto.categoria }}</a> <a href="{% url 'categoria_remover' id=produto.categoria.id %}">Remover</a></p>
+                        <p>Cadastrado por: {{ produto.criado_por.username }}</p>
+                    {% else %}
+                    <p>Categoria: {{ produto.categoria }}</p>
+                    {% endif %}
+
+                    {% if user.is_superuser %}
+                    <div class="center-img">
+                        <a href="{% url 'produto_remover' id=produto.id %}" id="excluir">
+                            <img src="{% static 'img/trash.png' %}" alt="">
+                        </a>
+                        <a href="{% url 'produto_editar' id=produto.id %}" id="editar">
+                            <img src="{% static 'img/pencil.png' %}" alt="">
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        {% endfor %}
+    </div>
+
+</div>
+
+<div class="container-cadastro">
+    <div class="categoria-div">
+        <form method="post" class="categoria-form">
+            {% csrf_token %}
+            <h1>Editar Categoria</h1>
+            {{form.nome}}  
+            </div>
+            <div class="center-submit">
+                <input type="submit" value="Enviar" id="enviar">
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock main %}
+    
