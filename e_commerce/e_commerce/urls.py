@@ -27,7 +27,12 @@ urlpatterns = [
     # path('produto/', include('e_commerce.urls')),
     
     path('cadastro_produto/', produto_criar, name='cadastro_produto'),
+    path('cadastro_categoria/', categoria_criar, name='cadastro_categoria'),
     path('', listar_produtos, name='index'),
+    
+    path('categoria/<int:id>/', categoria_product, name='pag_categoria'),
+    path('categoria/remover/<int:id>/', categoria_remover, name='categoria_remover'),
+    path('categoria/editar/<int:id>/', categoria_editar, name='categoria_editar'),
     
     path('produto/<int:id>/', pag_product, name='pag_product'),
     path('produto/editar/<int:id>/', produto_editar, name='produto_editar'),

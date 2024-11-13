@@ -3,33 +3,10 @@
 
 
 {% block main %}
+    
+<link rel="stylesheet" href="{% static 'css/castrado.css' %}">
+<link rel="stylesheet" href="{% static 'css/categoria.css' %}">
 <link rel="stylesheet" href="{% static 'css/index.css' %}">
-<link rel="stylesheet" href="{% static 'js/jquery.js' %}">
-<script
-  src="https://code.jquery.com/jquery-3.7.1.min.js"
-  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-  crossorigin="anonymous"></script>
-
-<h1 id="title">Products</h1>
-<h2 id="sub-title">Order it for you or for your beloved ones </h2>
-
-<div class="div-filter">
-    <form id="filtro-form" method="GET" action="{% url 'index' %}">
-        <input type="text" id="input-filter" name="nome_produto">
-        <select name="filter" id="filter">
-            <option value="" selected disabled>Selecione</option>
-            {% for categoria in categorias %}
-                <option value="{{ categoria.id }}">{{ categoria.nome }}</option>
-            {% endfor %}
-        </select>
-        <button type="submit" id="enviar">Enviar</button>
-    </form>
-
-    {% if user.is_superuser %}
-        <a href="{% url 'cadastro_produto' %}" id="new-product">Novo Produto</a>
-        <a href="{% url 'cadastro_categoria' %}" id="new-product">Nova Categoria</a>
-    {% endif %}
-</div>
 
 <div class="center-cards">
 
@@ -68,6 +45,20 @@
     </div>
 
 </div>
-    
-{% endblock %}
+
+<div class="container-cadastro">
+    <div class="categoria-div">
+        <form method="post" class="categoria-form">
+            {% csrf_token %}
+            <h1>Editar Categoria</h1>
+            {{form.nome}}  
+            </div>
+            <div class="center-submit">
+                <input type="submit" value="Enviar" id="enviar">
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock main %}
     

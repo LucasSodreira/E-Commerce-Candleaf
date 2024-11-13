@@ -15,19 +15,26 @@ from .forms import *
 def listar_produtos(request):
     try:
         nome_produto = request.GET.get('nome_produto', '')
+        categoria_id = request.GET.get('categoria', None)  # Corrigido para 'categoria'
         
         categorias = Categoria.objects.all()
         
-        # Faça a filtragem com base nos parâmetros recebidos
-        produtos = Produto.objects.filter(nome__icontains=nome_produto)
-
+        # Filtra os produtos pelo nome, se fornecido
+        produtos = Produto.objects.all()
+        if nome_produto:
+            produtos = produtos.filter(nome__icontains=nome_produto)
+        
+        # Filtra os produtos pela categoria, se fornecido
+        if categoria_id:
+            produtos = produtos.filter(categoria_id=categoria_id)
+        
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             context = {'produtos': produtos}
             content = render_to_string('produtos_parcial.html', context)
-            return HttpResponse(content)  # Usando HttpResponse para retornar a string diretamente
+            return HttpResponse(content)
         else:
             return render(request, 'index.html', {'produtos': produtos, 'categorias': categorias})
-        
+    
     except Exception as e:
         print(f"Erro na view listar_produtos: {e}")
         return JsonResponse({'html_produtos': ''})
@@ -48,6 +55,7 @@ def produto_editar(request, id):
         form = ProdutoForm(request.POST, request.FILES, instance = produto)
 
         if form.is_valid():
+            form.instance.created_by = request.user
             form.save()
             return redirect('index')
     else:
@@ -65,15 +73,67 @@ def produto_remover(request, id):
 
 @group_required(['ADMINISTRADOR'])
 def produto_criar(request):
+
     if request.method == 'POST':
         form = ProdutoForm(request.POST, request.FILES)
         if form.is_valid():
+            produto = form.save(commit=False)
+            produto.criado_por = request.user
             form.save()
             return redirect('index')  # Redireciona para uma página de sucesso
     else:
         form = ProdutoForm()
 
     return render(request, "cadastro_pag.html", {'form': form})
+
+
+def categoria_product(request, id):
+    categoria = get_object_or_404(Categoria, pk=id)
+    return render(request, 'pag_categoria.html', {'produto': categoria})
+
+
+@group_required(['ADMINISTRADOR'])
+def categoria_remover(request, id):
+    categoria = get_object_or_404(Categoria, id=id)
+    categoria.delete()
+    return redirect('index')
+
+@group_required(['ADMINISTRADOR'])
+def categoria_criar(request):
+    if request.method == 'POST':
+        form = CategoriaForm(request.POST)
+        if form.is_valid():
+            form.instance.created_by = request.user
+            form.save()
+            return redirect('index')  # Redireciona para uma página de sucesso
+    else:
+        form = CategoriaForm()
+
+    return render(request, "categoria.html", {'form': form})
+
+@group_required(['ADMINISTRADOR'])
+def categoria_editar(request, id):
+    categoria = get_object_or_404(Categoria, id=id)
+    nome_produto = request.GET.get('nome_produto', '')
+        
+    categorias = Categoria.objects.all()
+    # Faça a filtragem com base nos parâmetros recebidos
+    produtos = Produto.objects.filter(nome__icontains=nome_produto)
+   
+    if request.method == 'POST':
+        form = CategoriaForm(request.POST, instance = categoria)
+
+        if form.is_valid():
+            form.instance.created_by = request.user
+            form.save()
+            return redirect('index')
+    else:
+        form = CategoriaForm(instance=categoria)
+
+    return render(request,'edit_categoria.html', {'form': form, 'produtos': produtos, 'categorias': categorias})
+
+
+
 
 def desconectar(request):
     logout(request)
@@ -121,5 +181,7 @@ def cadastro(request):
                 user.groups.add(group)
                 
                 return redirect('login')
+            else:
+                return HttpResponse(f'Erro ao cadastrar usuário. Tente novamente. {form.errors}')   
 
     return render(request, 'cadastro.html', {'form': form})
