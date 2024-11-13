@@ -54,6 +54,7 @@
     justify-content: center;
 }
 
+
 .container-products{
     display: flex;
     text-align: center;
@@ -61,7 +62,6 @@
     align-items: center;
     margin-bottom: 2rem;
     flex-wrap: wrap;
-    width: 90%;
     justify-content: center;
 }
 

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block main %}
+    
+<link rel="stylesheet" href="{% static 'css/castrado.css' %}">
+<link rel="stylesheet" href="{% static 'css/categoria.css' %}">
+
+<div class="container-cadastro">
+    <div class="categoria-div">
+        <form method="post" class="categoria-form">
+            {% csrf_token %}
+            <h1>Cadastrar Categoria</h1>
+            {{form.nome}}  
+            </div>
+            <div class="center-submit">
+                <input type="submit" value="Enviar" id="enviar">
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock main %}
+    
