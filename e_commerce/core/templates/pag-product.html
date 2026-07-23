@@ -9,7 +9,7 @@
 
     <div class="img-container">
         <div id="img-center">
-            <img id="img-color" src="{{ produto.imagem.url }}" alt="{{ produto.nome }}">
+            <img id="img-color" src="{% if produto.imagem %}{{ produto.imagem.url }}{% else %}{% static 'img/image_1.png' %}{% endif %}" alt="{{ produto.nome }}">
         </div>
         <p>All hand-made with natural soy wax,<br> Candleaf is made for your pleasure moments.</p>
         <p id='free-shiping'>🚚 FREE SHIPPING</p>
