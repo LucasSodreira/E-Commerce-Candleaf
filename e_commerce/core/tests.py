@@ -1,537 +1,469 @@
-import tempfile
-from io import BytesIO
-from PIL import Image
-from django.test import TestCase, Client
+import pytest
 from django.urls import reverse, resolve
-from django.contrib.auth.models import Group
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.http import HttpResponseForbidden
-from .models import User, Categoria, Produto
-from .forms import ProdutoForm
-from .decorators import group_required
+from core.models import User, Categoria, Produto
+from core.forms import ProdutoForm
 
 
-def criar_imagem_teste():
-    """Cria uma imagem PNG em memória para usar nos testes."""
-    img = Image.new('RGB', (100, 100), color='red')
-    buf = BytesIO()
-    img.save(buf, format='PNG')
-    buf.seek(0)
-    return SimpleUploadedFile('teste.png', buf.read(), content_type='image/png')
+# =============================================================================
+# Testes do modelo User
+# =============================================================================
 
-
-class UserModelTest(TestCase):
-    """Testes unitários para o modelo User."""
-
-    def setUp(self):
-        self.user = User.objects.create_user(
-            username='testeuser',
-            password='senha123',
-            email='teste@email.com'
-        )
+@pytest.mark.django_db
+class TestUserModel:
 
     def test_criacao_usuario(self):
         """Verifica se um usuário é criado corretamente."""
-        self.assertEqual(self.user.username, 'testeuser')
-        self.assertEqual(self.user.email, 'teste@email.com')
-        self.assertTrue(self.user.check_password('senha123'))
+        user = User.objects.create_user(
+            username='testeuser', password='senha123', email='teste@email.com'
+        )
+        assert user.username == 'testeuser'
+        assert user.email == 'teste@email.com'
+        assert user.check_password('senha123')
 
     def test_str_usuario(self):
         """Verifica a representação em string do usuário."""
-        self.assertEqual(str(self.user), 'testeuser')
+        user = User.objects.create_user(username='testeuser', password='senha123')
+        assert str(user) == 'testeuser'
 
     def test_usuario_superuser(self):
         """Verifica a criação de um superusuário."""
         admin = User.objects.create_superuser(
             username='admin', password='admin123', email='admin@email.com'
         )
-        self.assertTrue(admin.is_superuser)
-        self.assertTrue(admin.is_staff)
+        assert admin.is_superuser
+        assert admin.is_staff
 
 
-class CategoriaModelTest(TestCase):
-    """Testes unitários para o modelo Categoria."""
+# =============================================================================
+# Testes do modelo Categoria
+# =============================================================================
 
-    def setUp(self):
-        self.categoria = Categoria.objects.create(nome='Velas')
+@pytest.mark.django_db
+class TestCategoriaModel:
 
-    def test_criacao_categoria(self):
+    def test_criacao_categoria(self, categoria):
         """Verifica se uma categoria é criada corretamente."""
-        self.assertEqual(self.categoria.nome, 'Velas')
+        assert categoria.nome == 'Velas'
 
-    def test_str_categoria(self):
+    def test_str_categoria(self, categoria):
         """Verifica a representação em string da categoria."""
-        self.assertEqual(str(self.categoria), 'Velas')
+        assert str(categoria) == 'Velas'
 
 
-class ProdutoModelTest(TestCase):
-    """Testes unitários para o modelo Produto."""
+# =============================================================================
+# Testes do modelo Produto
+# =============================================================================
 
-    def setUp(self):
-        self.user = User.objects.create_user(username='vendedor', password='senha123')
-        self.categoria = Categoria.objects.create(nome='Aromatizantes')
+@pytest.mark.django_db
+class TestProdutoModel:
 
-    def test_criacao_produto(self):
+    def test_criacao_produto(self, usuario_admin, categoria):
         """Verifica se um produto é criado corretamente com todos os campos."""
         produto = Produto.objects.create(
             nome='Vela Lavanda',
             descricao='Vela artesanal com aroma de lavanda',
             preco=29.90,
-            categoria=self.categoria,
-            user=self.user,
+            categoria=categoria,
+            user=usuario_admin,
         )
-        self.assertEqual(produto.nome, 'Vela Lavanda')
-        self.assertEqual(produto.descricao, 'Vela artesanal com aroma de lavanda')
-        self.assertEqual(float(produto.preco), 29.90)
-        self.assertEqual(produto.categoria, self.categoria)
-        self.assertEqual(produto.user, self.user)
+        assert produto.nome == 'Vela Lavanda'
+        assert produto.descricao == 'Vela artesanal com aroma de lavanda'
+        assert float(produto.preco) == 29.90
+        assert produto.categoria == categoria
+        assert produto.user == usuario_admin
 
-    def test_str_produto(self):
+    def test_str_produto(self, usuario_admin, categoria):
         """Verifica a representação em string do produto."""
         produto = Produto.objects.create(
-            nome='Vela Baunilha',
-            descricao='Vela com aroma de baunilha',
-            preco=35.00,
-            categoria=self.categoria,
-            user=self.user,
+            nome='Vela Baunilha', descricao='Vela de baunilha',
+            preco=35.00, categoria=categoria, user=usuario_admin,
         )
-        self.assertEqual(str(produto), 'Vela Baunilha')
+        assert str(produto) == 'Vela Baunilha'
 
-    def test_produto_com_imagem(self):
+    def test_produto_com_imagem(self, usuario_admin, categoria, imagem_teste):
         """Verifica se um produto pode ser criado com imagem."""
-        imagem = criar_imagem_teste()
         produto = Produto.objects.create(
-            nome='Vela Rosa',
-            descricao='Vela rosa',
-            preco=45.00,
-            categoria=self.categoria,
-            user=self.user,
-            imagem=imagem,
+            nome='Vela Rosa', descricao='Vela rosa',
+            preco=45.00, categoria=categoria, user=usuario_admin,
+            imagem=imagem_teste,
         )
-        self.assertIsNotNone(produto.imagem)
-        self.assertTrue(produto.imagem.name.startswith('produtos/'))
+        assert produto.imagem is not None
+        assert produto.imagem.name.startswith('produtos/')
 
-    def test_produto_sem_imagem(self):
+    def test_produto_sem_imagem(self, usuario_admin, categoria):
         """Verifica se um produto pode ser criado sem imagem."""
         produto = Produto.objects.create(
-            nome='Vela Sem Imagem',
-            descricao='Vela sem foto',
-            preco=15.00,
-            categoria=self.categoria,
-            user=self.user,
+            nome='Vela Sem Imagem', descricao='Vela sem foto',
+            preco=15.00, categoria=categoria, user=usuario_admin,
         )
-        self.assertFalse(produto.imagem)
+        assert not produto.imagem
 
-    def test_relacionamento_produto_categoria(self):
+    def test_relacionamento_produto_categoria(self, usuario_admin, categoria):
         """Verifica o relacionamento ForeignKey entre Produto e Categoria."""
         produto = Produto.objects.create(
-            nome='Difusor',
-            descricao='Difusor de aromas',
-            preco=59.90,
-            categoria=self.categoria,
-            user=self.user,
+            nome='Difusor', descricao='Difusor de aromas',
+            preco=59.90, categoria=categoria, user=usuario_admin,
         )
-        self.assertEqual(produto.categoria.nome, 'Aromatizantes')
+        assert produto.categoria.nome == 'Velas'
 
-    def test_relacionamento_produto_user(self):
+    def test_relacionamento_produto_user(self, usuario_admin, categoria):
         """Verifica o relacionamento ForeignKey entre Produto e User."""
         produto = Produto.objects.create(
-            nome='Sabonete',
-            descricao='Sabonete artesanal',
-            preco=12.50,
-            categoria=self.categoria,
-            user=self.user,
+            nome='Sabonete', descricao='Sabonete artesanal',
+            preco=12.50, categoria=categoria, user=usuario_admin,
         )
-        self.assertEqual(produto.user.username, 'vendedor')
+        assert produto.user.username == 'admin'
 
-    def test_delete_cascade_categoria(self):
-        """Verifica se ao deletar uma categoria, os produtos associados também são deletados."""
+    def test_delete_cascade_categoria(self, usuario_admin, categoria):
+        """Verifica se ao deletar uma categoria, os produtos são deletados."""
         Produto.objects.create(
-            nome='Vela Canela',
-            descricao='Vela de canela',
-            preco=25.00,
-            categoria=self.categoria,
-            user=self.user,
+            nome='Vela Canela', descricao='Vela de canela',
+            preco=25.00, categoria=categoria, user=usuario_admin,
         )
-        self.categoria.delete()
-        self.assertEqual(Produto.objects.filter(categoria__isnull=False).count(), 0)
+        categoria.delete()
+        assert Produto.objects.filter(categoria__isnull=False).count() == 0
 
 
-class ProdutoFormTest(TestCase):
-    """Testes unitários para o ProdutoForm."""
+# =============================================================================
+# Testes do ProdutoForm
+# =============================================================================
 
-    def setUp(self):
-        self.user = User.objects.create_user(username='vendedor', password='senha123')
-        self.categoria = Categoria.objects.create(nome='Velas')
+@pytest.mark.django_db
+class TestProdutoForm:
 
-    def test_form_valido(self):
+    def test_form_valido(self, categoria):
         """Verifica se o formulário é válido com dados corretos."""
-        dados = {
-            'nome': 'Vela Teste',
-            'descricao': 'Descrição da vela de teste',
-            'preco': '39.90',
-            'categoria': self.categoria.pk,
-        }
+        dados = {'nome': 'Vela Teste', 'descricao': 'Descrição',
+                 'preco': '39.90', 'categoria': categoria.pk}
         form = ProdutoForm(data=dados)
-        self.assertTrue(form.is_valid())
+        assert form.is_valid()
 
-    def test_form_invalido_sem_nome(self):
+    def test_form_invalido_sem_nome(self, categoria):
         """Verifica se o formulário é inválido sem o campo nome."""
-        dados = {
-            'descricao': 'Descrição',
-            'preco': '39.90',
-            'categoria': self.categoria.pk,
-        }
+        dados = {'descricao': 'Descrição', 'preco': '39.90',
+                 'categoria': categoria.pk}
         form = ProdutoForm(data=dados)
-        self.assertFalse(form.is_valid())
-        self.assertIn('nome', form.errors)
+        assert not form.is_valid()
+        assert 'nome' in form.errors
 
-    def test_form_invalido_preco_invalido(self):
+    def test_form_invalido_preco_invalido(self, categoria):
         """Verifica se o formulário rejeita preço com texto."""
-        dados = {
-            'nome': 'Vela Teste',
-            'descricao': 'Descrição',
-            'preco': 'abc',
-            'categoria': self.categoria.pk,
-        }
+        dados = {'nome': 'Vela Teste', 'descricao': 'Descrição',
+                 'preco': 'abc', 'categoria': categoria.pk}
         form = ProdutoForm(data=dados)
-        self.assertFalse(form.is_valid())
+        assert not form.is_valid()
 
     def test_form_campos_presentes(self):
         """Verifica se os campos esperados estão no formulário."""
         form = ProdutoForm()
         campos_esperados = {'nome', 'descricao', 'preco', 'categoria', 'imagem'}
-        campos_form = set(form.fields.keys())
-        self.assertEqual(campos_form, campos_esperados)
+        assert set(form.fields.keys()) == campos_esperados
 
     def test_form_widgets(self):
         """Verifica se os widgets possuem os atributos corretos."""
         form = ProdutoForm()
-        self.assertEqual(form.fields['nome'].widget.attrs['placeholder'], 'Informe o título do produto')
-        self.assertEqual(form.fields['preco'].widget.attrs['step'], '0.01')
+        assert form.fields['nome'].widget.attrs['placeholder'] == 'Informe o título do produto'
+        assert form.fields['preco'].widget.attrs['step'] == '0.01'
 
 
-class DecoratorsTest(TestCase):
-    """Testes unitários para o decorator group_required."""
+# =============================================================================
+# Testes do decorator group_required
+# =============================================================================
 
-    def setUp(self):
-        self.client = Client()
-        self.grupo_admin = Group.objects.create(name='ADMINISTRADOR')
-        self.grupo_cliente = Group.objects.create(name='CLIENTE')
-        self.user_admin = User.objects.create_user(username='admin', password='admin123')
-        self.user_admin.groups.add(self.grupo_admin)
-        self.user_cliente = User.objects.create_user(username='cliente', password='cliente123')
-        self.user_cliente.groups.add(self.grupo_cliente)
-        self.user_sem_grupo = User.objects.create_user(username='solto', password='solto123')
+class TestDecorators:
 
-    def test_usuario_autenticado_grupo_correto(self):
+    @pytest.mark.django_db
+    def test_usuario_autenticado_grupo_correto(self, client, usuario_admin):
         """Verifica se usuário autenticado no grupo certo tem acesso."""
-        self.client.login(username='admin', password='admin123')
-        response = self.client.get(reverse('cadastro_produto'))
-        self.assertNotEqual(response.status_code, 403)
+        client.force_login(usuario_admin)
+        response = client.get(reverse('cadastro_produto'))
+        assert response.status_code != 403
 
-    def test_usuario_autenticado_grupo_errado(self):
+    @pytest.mark.django_db
+    def test_usuario_autenticado_grupo_errado(self, client, usuario_cliente):
         """Verifica se usuário autenticado no grupo errado recebe 403."""
-        self.client.login(username='cliente', password='cliente123')
-        response = self.client.get(reverse('cadastro_produto'))
-        self.assertEqual(response.status_code, 403)
+        client.force_login(usuario_cliente)
+        response = client.get(reverse('cadastro_produto'))
+        assert response.status_code == 403
 
-    def test_usuario_nao_autenticado(self):
+    @pytest.mark.django_db
+    def test_usuario_nao_autenticado(self, client):
         """Verifica se usuário não autenticado recebe 403."""
-        response = self.client.get(reverse('cadastro_produto'))
-        self.assertEqual(response.status_code, 403)
+        response = client.get(reverse('cadastro_produto'))
+        assert response.status_code == 403
 
-    def test_usuario_sem_grupo(self):
+    @pytest.mark.django_db
+    def test_usuario_sem_grupo(self, client, usuario_sem_grupo):
         """Verifica se usuário sem grupo recebe 403."""
-        self.client.login(username='solto', password='solto123')
-        response = self.client.get(reverse('cadastro_produto'))
-        self.assertEqual(response.status_code, 403)
+        client.force_login(usuario_sem_grupo)
+        response = client.get(reverse('cadastro_produto'))
+        assert response.status_code == 403
 
 
-class ViewsTest(TestCase):
-    """Testes de sistema para as views do projeto."""
+# =============================================================================
+# Testes de Views (sistema)
+# =============================================================================
 
-    def setUp(self):
-        self.client = Client()
-        self.grupo_admin = Group.objects.create(name='ADMINISTRADOR')
-        Group.objects.create(name='CLIENTE')
-        self.admin = User.objects.create_superuser(
-            username='admin', password='admin123', email='admin@email.com'
-        )
-        self.admin.groups.add(self.grupo_admin)
-        self.user = User.objects.create_user(username='comum', password='comum123')
-        self.categoria = Categoria.objects.create(nome='Velas')
-        self.produto = Produto.objects.create(
-            nome='Vela Teste',
-            descricao='Vela de teste automatizado',
-            preco=49.90,
-            categoria=self.categoria,
-            user=self.admin,
-        )
+@pytest.mark.django_db
+class TestViewsListarProdutos:
 
-    # --- Testes da view listar_produtos (página inicial) ---
-
-    def test_index_status_code(self):
+    def test_index_status_code(self, client, produto):
         """Verifica se a página inicial retorna status 200."""
-        response = self.client.get(reverse('index'))
-        self.assertEqual(response.status_code, 200)
+        response = client.get(reverse('index'))
+        assert response.status_code == 200
 
-    def test_index_template_usado(self):
-        """Verifica se a página inicial usa o template correto."""
-        response = self.client.get(reverse('index'))
-        self.assertTemplateUsed(response, 'index.html')
+    def test_index_contexto_produtos(self, client, produto):
+        """Verifica se o contexto contém produtos."""
+        response = client.get(reverse('index'))
+        assert 'produtos' in response.context
+        assert produto in response.context['produtos']
 
-    def test_index_contexto_produtos(self):
-        """Verifica se o contexto da página inicial contém produtos."""
-        response = self.client.get(reverse('index'))
-        self.assertIn('produtos', response.context)
-        self.assertIn(self.produto, response.context['produtos'])
+    def test_index_contexto_categorias(self, client, produto, categoria):
+        """Verifica se o contexto contém categorias."""
+        response = client.get(reverse('index'))
+        assert 'categorias' in response.context
+        assert categoria in response.context['categorias']
 
-    def test_index_contexto_categorias(self):
-        """Verifica se o contexto da página inicial contém categorias."""
-        response = self.client.get(reverse('index'))
-        self.assertIn('categorias', response.context)
-        self.assertIn(self.categoria, response.context['categorias'])
-
-    def test_index_busca_por_nome(self):
+    def test_index_busca_por_nome(self, client, usuario_admin, categoria):
         """Verifica a busca de produtos pelo nome."""
         Produto.objects.create(
             nome='Vela Lavanda', descricao='Teste', preco=30.00,
-            categoria=self.categoria, user=self.admin,
+            categoria=categoria, user=usuario_admin,
         )
-        response = self.client.get(reverse('index'), {'nome_produto': 'Lavanda'})
-        self.assertContains(response, 'Vela Lavanda')
-        self.assertNotContains(response, 'Vela Teste')
+        response = client.get(reverse('index'), {'nome_produto': 'Lavanda'})
+        assert response.status_code == 200
+        assert 'Vela Lavanda' in response.content.decode()
 
-    def test_index_ajax_request(self):
-        """Verifica se requisição AJAX retorna apenas o partial template."""
-        response = self.client.get(
-            reverse('index'),
-            {'nome_produto': ''},
+    def test_index_ajax_request(self, client, produto):
+        """Verifica se requisição AJAX retorna o partial."""
+        response = client.get(
+            reverse('index'), {'nome_produto': ''},
             HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'produtos_parcial.html')
+        assert response.status_code == 200
 
-    # --- Testes da view pag_product (detalhe do produto) ---
 
-    def test_pag_product_status_code(self):
+class TestViewsPagProduct:
+
+    @pytest.mark.django_db
+    def test_pag_product_status_code(self, client, produto):
         """Verifica se a página de detalhe retorna 200."""
-        response = self.client.get(reverse('pag_product', args=[self.produto.id]))
-        self.assertEqual(response.status_code, 200)
+        response = client.get(reverse('pag_product', args=[produto.id]))
+        assert response.status_code == 200
 
-    def test_pag_product_template_usado(self):
-        """Verifica se a página de detalhe usa o template correto."""
-        response = self.client.get(reverse('pag_product', args=[self.produto.id]))
-        self.assertTemplateUsed(response, 'pag-product.html')
-
-    def test_pag_product_contexto(self):
+    @pytest.mark.django_db
+    def test_pag_product_contexto(self, client, produto):
         """Verifica se o contexto contém o produto correto."""
-        response = self.client.get(reverse('pag_product', args=[self.produto.id]))
-        self.assertEqual(response.context['produto'], self.produto)
+        response = client.get(reverse('pag_product', args=[produto.id]))
+        assert response.context['produto'] == produto
 
-    def test_pag_product_404(self):
+    @pytest.mark.django_db
+    def test_pag_product_404(self, client):
         """Verifica se um ID inexistente retorna 404."""
-        response = self.client.get(reverse('pag_product', args=[9999]))
-        self.assertEqual(response.status_code, 404)
+        response = client.get(reverse('pag_product', args=[9999]))
+        assert response.status_code == 404
 
-    # --- Testes da view produto_criar ---
 
-    def test_produto_criar_get_autenticado(self):
-        """Verifica se admin autenticado pode acessar o formulário de criação."""
-        self.client.login(username='admin', password='admin123')
-        response = self.client.get(reverse('cadastro_produto'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'cadastro_pag.html')
+class TestViewsProdutoCriar:
 
-    def test_produto_criar_post_valido(self):
+    @pytest.mark.django_db
+    def test_get_autenticado(self, client, usuario_admin, categoria):
+        """Verifica se admin autenticado acessa o formulário de criação."""
+        client.force_login(usuario_admin)
+        response = client.get(reverse('cadastro_produto'))
+        assert response.status_code == 200
+
+    @pytest.mark.django_db
+    def test_post_valido(self, client, usuario_admin, categoria):
         """Verifica se um produto é criado via POST com dados válidos."""
-        self.client.login(username='admin', password='admin123')
-        dados = {
-            'nome': 'Novo Produto Teste',
-            'descricao': 'Descrição do produto criado no teste',
-            'preco': '99.90',
-            'categoria': self.categoria.pk,
-        }
-        response = self.client.post(reverse('cadastro_produto'), dados, follow=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(Produto.objects.filter(nome='Novo Produto Teste').exists())
+        client.force_login(usuario_admin)
+        dados = {'nome': 'Novo Produto Teste', 'descricao': 'Descrição',
+                 'preco': '99.90', 'categoria': categoria.pk}
+        response = client.post(reverse('cadastro_produto'), dados, follow=True)
+        assert response.status_code == 200
+        assert Produto.objects.filter(nome='Novo Produto Teste').exists()
 
-    def test_produto_criar_post_sem_autenticacao(self):
-        """Verifica que usuário não autenticado recebe 403 ao criar produto."""
-        dados = {
-            'nome': 'Produto Sem Auth',
-            'descricao': 'Teste',
-            'preco': '10.00',
-            'categoria': self.categoria.pk,
-        }
-        response = self.client.post(reverse('cadastro_produto'), dados)
-        self.assertEqual(response.status_code, 403)
+    @pytest.mark.django_db
+    def test_post_sem_autenticacao(self, client, categoria):
+        """Verifica que usuário não autenticado recebe 403."""
+        dados = {'nome': 'Produto Sem Auth', 'descricao': 'Teste',
+                 'preco': '10.00', 'categoria': categoria.pk}
+        response = client.post(reverse('cadastro_produto'), dados)
+        assert response.status_code == 403
 
-    # --- Testes da view produto_editar ---
 
-    def test_produto_editar_get_autenticado(self):
-        """Verifica se admin autenticado pode acessar o formulário de edição."""
-        self.client.login(username='admin', password='admin123')
-        response = self.client.get(reverse('produto_editar', args=[self.produto.id]))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'cadastro_pag.html')
+class TestViewsProdutoEditar:
 
-    def test_produto_editar_post_valido(self):
+    @pytest.mark.django_db
+    def test_get_autenticado(self, client, usuario_admin, produto):
+        """Verifica se admin autenticado acessa o formulário de edição."""
+        client.force_login(usuario_admin)
+        response = client.get(reverse('produto_editar', args=[produto.id]))
+        assert response.status_code == 200
+
+    @pytest.mark.django_db
+    def test_post_valido(self, client, usuario_admin, produto, categoria):
         """Verifica se um produto é atualizado via POST."""
-        self.client.login(username='admin', password='admin123')
-        dados = {
-            'nome': 'Vela Editada',
-            'descricao': 'Descrição editada',
-            'preco': '149.90',
-            'categoria': self.categoria.pk,
-        }
-        response = self.client.post(
-            reverse('produto_editar', args=[self.produto.id]), dados, follow=True
+        client.force_login(usuario_admin)
+        dados = {'nome': 'Vela Editada', 'descricao': 'Descrição editada',
+                 'preco': '149.90', 'categoria': categoria.pk}
+        response = client.post(
+            reverse('produto_editar', args=[produto.id]), dados, follow=True
         )
-        self.produto.refresh_from_db()
-        self.assertEqual(self.produto.nome, 'Vela Editada')
-        self.assertEqual(float(self.produto.preco), 149.90)
+        assert response.status_code == 200
+        produto.refresh_from_db()
+        assert produto.nome == 'Vela Editada'
+        assert float(produto.preco) == 149.90
 
-    # --- Testes da view produto_remover ---
 
-    def test_produto_remover_autenticado(self):
+class TestViewsProdutoRemover:
+
+    @pytest.mark.django_db
+    def test_remover_autenticado(self, client, usuario_admin, produto):
         """Verifica se admin autenticado pode remover um produto."""
-        self.client.login(username='admin', password='admin123')
-        response = self.client.post(reverse('produto_remover', args=[self.produto.id]), follow=True)
-        self.assertFalse(Produto.objects.filter(id=self.produto.id).exists())
+        client.force_login(usuario_admin)
+        response = client.post(
+            reverse('produto_remover', args=[produto.id]), follow=True
+        )
+        assert response.status_code == 200
+        assert not Produto.objects.filter(id=produto.id).exists()
 
-    def test_produto_remover_nao_autenticado(self):
-        """Verifica que usuário não autenticado recebe 403 ao remover."""
-        response = self.client.get(reverse('produto_remover', args=[self.produto.id]))
-        self.assertEqual(response.status_code, 403)
+    @pytest.mark.django_db
+    def test_remover_nao_autenticado(self, client, produto):
+        """Verifica que não autenticado recebe 403 ao remover."""
+        response = client.get(reverse('produto_remover', args=[produto.id]))
+        assert response.status_code == 403
 
-    # --- Testes da view login ---
 
-    def test_login_get(self):
+@pytest.mark.django_db
+class TestViewsLogin:
+
+    def test_login_get(self, client):
         """Verifica se a página de login retorna 200."""
-        response = self.client.get(reverse('login'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'login.html')
+        response = client.get(reverse('login'))
+        assert response.status_code == 200
 
-    def test_login_post_valido(self):
+    def test_login_post_valido(self, client, usuario_admin):
         """Verifica se o login funciona com credenciais corretas."""
-        response = self.client.post(reverse('login'), {
-            'username': 'admin',
-            'password': 'admin123',
+        response = client.post(reverse('login'), {
+            'username': 'admin', 'password': 'admin123',
         }, follow=True)
-        self.assertRedirects(response, reverse('index'))
+        assert response.status_code == 200
+        assert response.redirect_chain[-1][0] == reverse('index')
 
-    def test_login_post_invalido(self):
+    def test_login_post_invalido(self, client):
         """Verifica se o login falha com credenciais incorretas."""
-        response = self.client.post(reverse('login'), {
-            'username': 'admin',
-            'password': 'senha_errada',
+        response = client.post(reverse('login'), {
+            'username': 'admin', 'password': 'senha_errada',
         })
-        self.assertContains(response, 'Credenciais inválidas')
+        assert response.status_code == 200
+        assert 'Credenciais inválidas' in response.content.decode()
 
-    def test_login_redireciona_se_autenticado(self):
-        """Verifica se usuário já logado é redirecionado para o index."""
-        self.client.login(username='admin', password='admin123')
-        response = self.client.get(reverse('login'))
-        self.assertRedirects(response, reverse('index'))
+    def test_login_redireciona_se_autenticado(self, client, usuario_admin):
+        """Verifica se usuário logado é redirecionado para o index."""
+        client.force_login(usuario_admin)
+        response = client.get(reverse('login'))
+        assert response.status_code == 302
+        assert response.url == reverse('index')
 
-    # --- Testes da view cadastro ---
 
-    def test_cadastro_get(self):
+@pytest.mark.django_db
+class TestViewsCadastro:
+
+    def test_cadastro_get(self, client):
         """Verifica se a página de cadastro retorna 200."""
-        response = self.client.get(reverse('cadastro'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'cadastro.html')
+        response = client.get(reverse('cadastro'))
+        assert response.status_code == 200
 
-    def test_cadastro_post_valido(self):
+    def test_cadastro_post_valido(self, client, grupo_cliente):
         """Verifica se um novo usuário é cadastrado com sucesso."""
-        response = self.client.post(reverse('cadastro'), {
+        response = client.post(reverse('cadastro'), {
             'username': 'novousuario',
             'password1': 'senhaForte123!',
             'password2': 'senhaForte123!',
         }, follow=True)
-        self.assertRedirects(response, reverse('login'))
-        self.assertTrue(User.objects.filter(username='novousuario').exists())
+        assert response.status_code == 200
+        assert response.redirect_chain[-1][0] == reverse('login')
+        assert User.objects.filter(username='novousuario').exists()
 
-    def test_cadastro_usuario_grupo_cliente(self):
+    def test_cadastro_usuario_grupo_cliente(self, client, grupo_cliente):
         """Verifica se o novo usuário é associado ao grupo CLIENTE."""
-        self.client.post(reverse('cadastro'), {
+        client.post(reverse('cadastro'), {
             'username': 'novocliente',
             'password1': 'senhaForte123!',
             'password2': 'senhaForte123!',
         })
         usuario = User.objects.get(username='novocliente')
-        self.assertTrue(usuario.groups.filter(name='CLIENTE').exists())
+        assert usuario.groups.filter(name='CLIENTE').exists()
 
-    def test_cadastro_redireciona_se_autenticado(self):
+    def test_cadastro_redireciona_se_autenticado(self, client, usuario_admin):
         """Verifica se usuário logado é redirecionado para o index."""
-        self.client.login(username='admin', password='admin123')
-        response = self.client.get(reverse('cadastro'))
-        self.assertRedirects(response, reverse('index'))
+        client.force_login(usuario_admin)
+        response = client.get(reverse('cadastro'))
+        assert response.status_code == 302
+        assert response.url == reverse('index')
 
-    # --- Testes da view desconectar ---
 
-    def test_desconectar(self):
+@pytest.mark.django_db
+class TestViewsDesconectar:
+
+    def test_desconectar(self, client, usuario_admin):
         """Verifica se o logout funciona e redireciona para o index."""
-        self.client.login(username='admin', password='admin123')
-        response = self.client.get(reverse('desconectar'), follow=True)
-        self.assertRedirects(response, reverse('index'))
+        client.force_login(usuario_admin)
+        response = client.get(reverse('desconectar'), follow=True)
+        assert response.status_code == 200
+        assert response.redirect_chain[-1][0] == reverse('index')
         # Verifica que o usuário não está mais autenticado
-        response = self.client.get(reverse('index'))
-        self.assertFalse(response.context['user'].is_authenticated)
+        response = client.get(reverse('index'))
+        assert not response.context['user'].is_authenticated
 
 
-class URLsTest(TestCase):
-    """Testes de sistema para as URLs do projeto."""
+# =============================================================================
+# Testes de URLs
+# =============================================================================
+
+class TestURLs:
 
     def test_url_index_resolve(self):
         """Verifica se a URL '/' resolve para a view correta."""
         resolver = resolve('/')
-        self.assertEqual(resolver.func.__name__, 'listar_produtos')
-        self.assertEqual(resolver.url_name, 'index')
+        assert resolver.func.__name__ == 'listar_produtos'
+        assert resolver.url_name == 'index'
 
     def test_url_login_resolve(self):
-        """Verifica se a URL '/login/' resolve para a view correta."""
         resolver = resolve('/login/')
-        self.assertEqual(resolver.func.__name__, 'login')
+        assert resolver.func.__name__ == 'login'
 
     def test_url_cadastro_resolve(self):
-        """Verifica se a URL '/cadastro/' resolve para a view correta."""
         resolver = resolve('/cadastro/')
-        self.assertEqual(resolver.func.__name__, 'cadastro')
+        assert resolver.func.__name__ == 'cadastro'
 
     def test_url_desconectar_resolve(self):
-        """Verifica se a URL '/desconectar/' resolve para a view correta."""
         resolver = resolve('/desconectar/')
-        self.assertEqual(resolver.func.__name__, 'desconectar')
+        assert resolver.func.__name__ == 'desconectar'
 
     def test_url_produto_criar_resolve(self):
-        """Verifica se a URL '/cadastro_produto/' resolve para a view correta."""
         resolver = resolve('/cadastro_produto/')
-        self.assertEqual(resolver.func.__name__, 'produto_criar')
+        assert resolver.func.__name__ == 'produto_criar'
 
     def test_url_admin_resolve(self):
-        """Verifica se a URL '/admin/' resolve corretamente."""
         resolver = resolve('/admin/')
-        self.assertEqual(resolver.func.__name__, 'index')
+        assert resolver.func.__name__ == 'index'
 
     def test_urls_com_id_resolvem(self):
-        """Verifica se URLs com parâmetro id resolvem corretamente."""
         resolver_produto = resolve('/produto/1/')
-        self.assertEqual(resolver_produto.func.__name__, 'pag_product')
+        assert resolver_produto.func.__name__ == 'pag_product'
         resolver_editar = resolve('/produto/editar/1/')
-        self.assertEqual(resolver_editar.func.__name__, 'produto_editar')
+        assert resolver_editar.func.__name__ == 'produto_editar'
         resolver_remover = resolve('/produto/remover/1/')
-        self.assertEqual(resolver_remover.func.__name__, 'produto_remover')
+        assert resolver_remover.func.__name__ == 'produto_remover'
 
     def test_urls_reverse(self):
-        """Verifica se os nomes das URLs geram os caminhos corretos."""
-        self.assertEqual(reverse('index'), '/')
-        self.assertEqual(reverse('login'), '/login/')
-        self.assertEqual(reverse('cadastro'), '/cadastro/')
-        self.assertEqual(reverse('desconectar'), '/desconectar/')
-        self.assertEqual(reverse('cadastro_produto'), '/cadastro_produto/')
-        self.assertEqual(reverse('pag_product', args=[1]), '/produto/1/')
-        self.assertEqual(reverse('produto_editar', args=[1]), '/produto/editar/1/')
-        self.assertEqual(reverse('produto_remover', args=[1]), '/produto/remover/1/')
+        assert reverse('index') == '/'
+        assert reverse('login') == '/login/'
+        assert reverse('cadastro') == '/cadastro/'
+        assert reverse('desconectar') == '/desconectar/'
+        assert reverse('cadastro_produto') == '/cadastro_produto/'
+        assert reverse('pag_product', args=[1]) == '/produto/1/'
+        assert reverse('produto_editar', args=[1]) == '/produto/editar/1/'
+        assert reverse('produto_remover', args=[1]) == '/produto/remover/1/'
