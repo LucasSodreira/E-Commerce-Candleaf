@@ -1,13 +1,13 @@
 # 🕯️ Candleaf — E-Commerce de Velas Artesanais
 
-Sistema web de e-commerce desenvolvido com **Django 5** para venda de velas artesanais e aromatizantes.  
+Sistema web de e-commerce desenvolvido com **Django 5** para venda de velas artesanais e aromatizantes.
 O projeto conta com autenticação de usuários, cadastro e gerenciamento de produtos, busca por nome e painel administrativo.
 
 ---
 
 ## Funcionalidades
 
-- **Catálogo de produtos** — Listagem com busca por nome e filtro por categoria
+- **Catálogo de produtos** — Listagem com busca por nome
 - **Detalhe do produto** — Página individual com descrição, preço e imagem
 - **Cadastro de usuário** — Novos usuários são automaticamente associados ao grupo *CLIENTE*
 - **Login / Logout** — Autenticação com grupos de permissão (*ADMINISTRADOR* e *CLIENTE*)
@@ -19,13 +19,14 @@ O projeto conta com autenticação de usuários, cadastro e gerenciamento de pro
 
 ## Tecnologias
 
-| Ferramenta | Versão |
-|------------|--------|
-| Python     | 3.11+  |
-| Django     | 5.0    |
-| SQLite     | 3.x    |
-| Pillow     | 10.x   |
-| psycopg2   | 2.9    |
+| Ferramenta | Versão  |
+|------------|---------|
+| Python     | 3.11+   |
+| Django     | 5.0     |
+| SQLite     | 3.x     |
+| Pillow     | 10.x    |
+| pytest     | 7.4+    |
+| pytest-django | 4.7+ |
 
 ---
 
@@ -50,7 +51,7 @@ source venv/bin/activate
 ### 3. Instale as dependências
 
 ```bash
-pip install django pillow
+pip install django pillow pytest pytest-django
 ```
 
 ### 4. Execute as migrações
@@ -87,25 +88,27 @@ Acesse [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
 ```
 e_commerce/
-├── core/                    # Aplicativo principal
-│   ├── management/commands/ # Comandos personalizados (load_db_data)
-│   ├── migrations/          # Migrações do banco de dados
-│   ├── static/              # Arquivos estáticos (CSS, JS, imagens)
+├── conftest.py               # Fixtures compartilhadas do pytest
+├── pytest.ini                # Configuração do pytest-django
+├── core/                     # Aplicativo principal
+│   ├── management/commands/  # Comandos personalizados (load_db_data)
+│   ├── migrations/           # Migrações do banco de dados
+│   ├── static/               # Arquivos estáticos (CSS, JS, imagens)
 │   │   ├── css/
 │   │   ├── img/
 │   │   └── js/
-│   ├── templates/           # Templates HTML
-│   ├── admin.py             # Configuração do painel admin
-│   ├── decorators.py        # Decorator de permissão por grupo
-│   ├── forms.py             # Formulários (ProdutoForm, UserCreateForm)
-│   ├── models.py            # Modelos (User, Categoria, Produto)
-│   ├── tests.py             # Testes automatizados
-│   └── views.py             # Views (lógica das páginas)
-├── e_commerce/              # Configurações do projeto Django
-│   ├── settings.py          # Configurações gerais
-│   └── urls.py              # Mapeamento de URLs
-├── media/                   # Uploads de usuários (imagens)
-├── manage.py                # Utilitário de linha de comando
+│   ├── templates/            # Templates HTML
+│   ├── admin.py              # Configuração do painel admin
+│   ├── decorators.py         # Decorator de permissão por grupo
+│   ├── forms.py              # Formulários (ProdutoForm, UserCreateForm)
+│   ├── models.py             # Modelos (User, Categoria, Produto)
+│   ├── tests.py              # Testes com pytest-django
+│   └── views.py              # Views (lógica das páginas)
+├── e_commerce/               # Configurações do projeto Django
+│   ├── settings.py           # Configurações gerais
+│   └── urls.py               # Mapeamento de URLs
+├── media/                    # Uploads de usuários (imagens)
+├── manage.py                 # Utilitário de linha de comando
 └── README.md
 ```
 
@@ -113,48 +116,92 @@ e_commerce/
 
 ## Testes
 
-O projeto possui **55 testes automatizados** divididos em 6 classes de teste.
+O projeto possui **53 testes automatizados** com **pytest** + **pytest-django**,
+distribuídos em 13 classes de teste.
 
 ### Como executar
 
 ```bash
-python manage.py test core
+pytest
 ```
 
-Para mais detalhes (verbosidade):
+Com relatório detalhado:
 
 ```bash
-python manage.py test core --verbosity=2
+pytest -v
+```
+
+Para rodar apenas um arquivo ou classe:
+
+```bash
+pytest core/tests.py
+pytest core/tests.py::TestProdutoModel
+pytest core/tests.py::TestViewsLogin::test_login_post_valido
 ```
 
 ### O que os testes cobrem
 
-#### Testes Unitários (Modelos)
+#### Modelos (`TestUserModel`, `TestCategoriaModel`, `TestProdutoModel`)
 
-| Classe | Testes | Descrição |
-|--------|--------|-----------|
-| `UserModelTest` | 3 | Criação de usuário, superusuário, representação `__str__` |
-| `CategoriaModelTest` | 2 | Criação de categoria, `__str__` |
-| `ProdutoModelTest` | 8 | Criação com/sem imagem, relacionamentos FK, `__str__`, deleção em cascata |
+| Teste | Descrição |
+|-------|-----------|
+| `test_criacao_usuario` | Criação de usuário com username, email e senha |
+| `test_usuario_superuser` | Criação de superusuário (is_superuser, is_staff) |
+| `test_criacao_produto` | Criação de produto com todos os campos e relacionamentos |
+| `test_produto_com_imagem` | Upload de imagem no produto |
+| `test_produto_sem_imagem` | Produto pode ser criado sem imagem |
+| `test_delete_cascade_categoria` | Deleção em cascata ao remover categoria |
+| `test_relacionamento_produto_categoria` | FK Produto → Categoria |
+| `test_relacionamento_produto_user` | FK Produto → User |
+| `test_str_*` | Representação `__str__` de todos os modelos |
 
-#### Testes Unitários (Formulários)
+#### Formulários (`TestProdutoForm`)
 
-| Classe | Testes | Descrição |
-|--------|--------|-----------|
-| `ProdutoFormTest` | 5 | Form válido, campos obrigatórios, widgets, validação de tipos |
+| Teste | Descrição |
+|-------|-----------|
+| `test_form_valido` | Formulário aceita dados corretos |
+| `test_form_invalido_sem_nome` | Validação de campo obrigatório |
+| `test_form_invalido_preco_invalido` | Validação de tipo do campo preço |
+| `test_form_campos_presentes` | Verifica os campos do formulário |
+| `test_form_widgets` | Verifica atributos dos widgets (placeholder, step) |
 
-#### Testes Unitários (Decorators)
+#### Decorator de Permissão (`TestDecorators`)
 
-| Classe | Testes | Descrição |
-|--------|--------|-----------|
-| `DecoratorsTest` | 4 | Acesso permitido/negado por grupo, ausência de autenticação |
+| Teste | Descrição |
+|-------|-----------|
+| `test_usuario_autenticado_grupo_correto` | Admin acessa páginas restritas (status ≠ 403) |
+| `test_usuario_autenticado_grupo_errado` | Cliente recebe 403 em páginas de admin |
+| `test_usuario_nao_autenticado` | Anônimo recebe 403 |
+| `test_usuario_sem_grupo` | Usuário sem grupo recebe 403 |
 
-#### Testes de Sistema (Views + URLs)
+#### Views — Funcionalidades (`TestViews*`)
 
-| Classe | Testes | Descrição |
-|--------|--------|-----------|
-| `ViewsTest` | 27 | Status HTTP, templates usados, contexto das views, fluxo de criação/edição/remoção de produtos, cadastro/login/logout, busca por nome, requisição AJAX |
-| `URLsTest` | 6 | Resolução de URLs, reversão de nomes, parâmetros dinâmicos |
+| Teste | Descrição |
+|-------|-----------|
+| `test_index_status_code` | Página inicial retorna 200 |
+| `test_index_busca_por_nome` | Busca de produtos pelo nome |
+| `test_index_ajax_request` | Requisição AJAX retorna conteúdo parcial |
+| `test_pag_product_status_code` | Página de detalhe retorna 200 |
+| `test_pag_product_404` | ID inexistente retorna 404 |
+| `test_produto_criar_post_valido` | Criação de produto via POST |
+| `test_produto_criar_post_sem_autenticacao` | Bloqueio de criação para não autenticados |
+| `test_produto_editar_post_valido` | Atualização de produto via POST |
+| `test_produto_remover_autenticado` | Remoção de produto por admin |
+| `test_produto_remover_nao_autenticado` | Bloqueio de remoção para não autenticados |
+| `test_login_post_valido` | Login com credenciais corretas |
+| `test_login_post_invalido` | Login com credenciais incorretas |
+| `test_login_redireciona_se_autenticado` | Redirecionamento de usuário já logado |
+| `test_cadastro_post_valido` | Cadastro de novo usuário |
+| `test_cadastro_usuario_grupo_cliente` | Associação automática ao grupo CLIENTE |
+| `test_desconectar` | Logout e verificação de sessão encerrada |
+
+#### URLs (`TestURLs`)
+
+| Teste | Descrição |
+|-------|-----------|
+| `test_url_*_resolve` | Cada URL resolve para a view correta |
+| `test_urls_com_id_resolvem` | URLs com parâmetro dinâmico funcionam |
+| `test_urls_reverse` | Nomes das URLs geram os caminhos corretos |
 
 ### Fluxos testados
 
